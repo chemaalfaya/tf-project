@@ -1,0 +1,18 @@
+{
+	// See http://go.microsoft.com/fwlink/?LinkId=827846
+	// for the documentation about the extensions.json format
+	"recommendations": [
+		"msjsdiag.debugger-for-chrome",
+
+		"eg2.tslint",
+		"dbaeumer.vscode-eslint",
+
+		"dbaeumer.jshint",
+		"robinbentley.sass-indented",
+		
+		"pmneo.tsimporter",
+		"kisstkondoros.vscode-codemetrics",
+		"HookyQR.beautify",
+		"wix.vscode-import-cost",
+	]
+}

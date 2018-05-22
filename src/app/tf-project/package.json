@@ -1,0 +1,10 @@
+{
+  "name": "tf-ptoject",
+  "version": "0.0.0",
+  "description": "A base angular library (tf-ptoject)",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
