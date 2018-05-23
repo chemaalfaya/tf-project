@@ -1,57 +1,76 @@
 const fsextra = require('fs-extra');
-const { exec } = require('child_process');
+const exec = require('await-exec');
 
-const filterFunc = (src, dest) => {
-    // it will be copied if return true
-    return !src.endsWith("spec.ts");
+
+compileToNpmPackage();
+
+//#region Methods
+async function removeDistLibDirectory() {
+    try {
+        await fsextra.remove('./dist-lib');
+        console.log('Output directory removed');
+    } catch (err) {
+      console.error(err);
+    }
 }
 
-fsextra.remove('./dist-lib', err => {
-    if (err) return console.error(err);
-    console.log('Output directory removed');
-    copyFiles();
-  });
-
-function copyFiles() {
-    fsextra.copy('./src/app/tf-project', './dist-lib', { filter: filterFunc }, err => {
-        if (err) return console.error(err);
-        console.log('Copied files');
-        createDeclarations();
-    });
+async function copyFiles() {
+    const filterFunc = (src, dest) => !src.endsWith("spec.ts");
+    try {
+        await fsextra.copy('./src/app/tf-project', './dist-lib', { filter: filterFunc });
+        console.log('New files copied to output directory');
+    } catch (err) {
+      console.error(err);
+    }
 }
 
-function createDeclarations() {
-  exec('cd dist-lib && tsc index.ts --declaration', () => {
-    console.log('Generated declarations (and some JS files...)');
-    createPackageJson();
-  });
+async function createDeclarations() {
+    try {
+        await exec('cd dist-lib && tsc index.ts --declaration --experimentalDecorators | awk "!/node_modules/"');
+        console.log('Declarations generated (and some JS files)');
+    } catch (err) {
+        console.error(err);
+    }
 }
 
-function createPackageJson() {
-  const packageJSON =  {
-    "name": "tf-project",
-    "version": "0.0.0",
-    "description": "Base tf-project",
-    "main": "index.js",
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "keywords": [
-      "Angular"
-    ],
-    "license": "MIT",
-    "types": "index.d.ts"
-  };
-  fsextra.writeJson('./dist-lib/package.json', packageJSON, {spaces: 2}, err => {
-    if (err) return console.error(err);
-    console.log('Created package.json');
-    packFiles();
-  });
+async function createPackageJson() {
+    const packageJSON =  {
+      "name": "tf-project",
+      "version": "0.0.0",
+      "description": "Base tf-project",
+      "main": "index.js",
+      "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+      },
+      "keywords": [
+        "Angular"
+      ],
+      "license": "MIT",
+      "types": "index.d.ts"
+    };
 
+    try {
+        await fsextra.writeJson('./dist-lib/package.json', packageJSON, {spaces: 2});
+        console.log('Package.json created');
+    } catch (err) {
+        console.error(err);
+    }
 }
 
-function packFiles() {
-    exec('cd dist-lib && npm pack', () => {
-        console.log('Generated NPM package');
-    });
+async function packFiles() {
+    try {
+        await exec('cd dist-lib && npm pack');
+        console.log('NPM package generated ');
+    } catch (err) {
+        console.error(err);
+    }
 }
+
+async function compileToNpmPackage() {
+    await removeDistLibDirectory();
+    await copyFiles();
+    await createDeclarations();
+    await createPackageJson();
+    await packFiles();
+}
+//#endregion
